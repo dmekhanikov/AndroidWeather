@@ -19,6 +19,9 @@ import android.widget.TextView;
 public class WeatherFragment extends Fragment {
 	private volatile View view;
 	private int cityId;
+	private static final String[] states = { "Clear", "Cloudy", "Cloudy",
+			"Clouds", "Short Rain", "Rain", "Thunderstorm", "Hail", "Sleet",
+			"Snow", "Heavy Snow" };
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,6 +54,10 @@ public class WeatherFragment extends Fragment {
 			TextView textTemp = (TextView) view
 					.findViewById(R.id.textTemperature);
 			textTemp.setText(w.temperature + "°C");
+			TextView textWeather = (TextView) view
+					.findViewById(R.id.textWeather);
+			int state = w.picName.charAt(1) - 48;
+			textWeather.setText(states[state]);
 			TextView textWind = (TextView) view.findViewById(R.id.textWind);
 			textWind.setText("Wind: " + w.wind + " m/s");
 			TextView textHumidity = (TextView) view
