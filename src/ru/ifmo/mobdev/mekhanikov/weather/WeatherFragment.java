@@ -9,7 +9,6 @@ import java.net.URL;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +43,7 @@ public class WeatherFragment extends Fragment {
 		return view;
 	}
 
-	private void updateView(Forecast forecast) {
+	private void updateView(Forecast forecast) throws Exception {
 		String packageName = this.getClass().getPackage().getName();
 		if (forecast.current.temperature != null) {
 			WeatherState w = forecast.current;
@@ -82,7 +81,6 @@ public class WeatherFragment extends Fragment {
 							packageName);
 					TextView textTemperature = (TextView) view
 							.findViewById(textTemperatureId);
-					Log.i("progress", day + " " + daypart);
 					textTemperature.setText(w.temperature + "°C");
 				}
 			}
@@ -126,7 +124,13 @@ public class WeatherFragment extends Fragment {
 		@Override
 		protected void onPostExecute(Forecast result) {
 			super.onPostExecute(result);
-			updateView(result);
+			try {
+				if (result != null) {
+					updateView(result);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
