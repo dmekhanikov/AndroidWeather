@@ -17,7 +17,7 @@ import android.widget.TextView;
 
 public class WeatherFragment extends Fragment {
 	private volatile View view;
-	private int cityId;
+	private String cityId;
 	private static final String[] states = { "Clear", "Cloudy", "Cloudy",
 			"Clouds", "Short Rain", "Rain", "Thunderstorm", "Hail", "Sleet",
 			"Snow", "Heavy Snow" };
@@ -27,17 +27,7 @@ public class WeatherFragment extends Fragment {
 			Bundle savedInstanceState) {
 		view = inflater.inflate(R.layout.weather_fragment_layout, container,
 				false);
-		switch (getArguments().getInt("position")) {
-		case 0:
-			cityId = 27;
-			break;
-		case 1:
-			cityId = 773;
-			break;
-		case 2:
-			cityId = 8750;
-			break;
-		}
+		cityId = getArguments().getString("cityId");
 		ForecastUpdater updater = new ForecastUpdater();
 		updater.execute(cityId);
 		return view;
@@ -87,14 +77,14 @@ public class WeatherFragment extends Fragment {
 		}
 	}
 
-	public class ForecastUpdater extends AsyncTask<Integer, Void, Forecast> {
+	public class ForecastUpdater extends AsyncTask<String, Void, Forecast> {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 		}
 
 		@Override
-		protected Forecast doInBackground(Integer... cityIds) {
+		protected Forecast doInBackground(String... cityIds) {
 			URL url;
 			String query = "http://xml.weather.co.ua/1.2/forecast/"
 					+ cityIds[0] + "?dayf=4";

@@ -2,5 +2,7 @@
 <resources>
 
     <string name="app_name">Weather</string>
+    <string name="title_activity_city_choose">City</string>
+    <string name="title_activity_city_add">CityAdd</string>
 
 </resources>

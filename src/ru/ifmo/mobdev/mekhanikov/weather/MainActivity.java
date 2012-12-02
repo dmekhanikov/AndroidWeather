@@ -1,11 +1,16 @@
 package ru.ifmo.mobdev.mekhanikov.weather;
 
+import java.util.List;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -19,12 +24,16 @@ public class MainActivity extends FragmentActivity {
 	 * intensive, it may be best to switch to a
 	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
 	 */
+	static final String PREF_NAME = "WeatherPrefs";
+	static final String PREF_CUR_POS = "CurrentPosition";
 	SectionsPagerAdapter mSectionsPagerAdapter;
 
 	/**
 	 * The {@link ViewPager} that will host the section contents.
 	 */
 	ViewPager mViewPager;
+	WeatherDataHelper dataHelper = null;
+	List<City> cities = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +47,31 @@ public class MainActivity extends FragmentActivity {
 		// primary sections of the app.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
 				getSupportFragmentManager());
-
+		
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-
+		dataHelper = new WeatherDataHelper(this, this.getClass().getPackage().getName());
+		cities = dataHelper.selectAllCities();
+		
+		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
+		int position = settings.getInt(PREF_CUR_POS, 0);
+		mViewPager.setCurrentItem(position);
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
+		SharedPreferences.Editor settingsEditor = settings.edit();
+		settingsEditor.putInt(PREF_CUR_POS, mViewPager.getCurrentItem());
+		settingsEditor.commit();
+	}
+	
+	public void goToCityChoose(View view) {
+		Intent intent = new Intent(MainActivity.this, CityListActivity.class);
+		startActivity(intent);
 	}
 
 	/**
@@ -59,28 +88,23 @@ public class MainActivity extends FragmentActivity {
 		public Fragment getItem(int position) {
 			Fragment fragment = new WeatherFragment();
 			Bundle args = new Bundle();
-			args.putInt("position", position);
+			args.putString("cityId", cities.get(position).cityId);
 			fragment.setArguments(args);
 			return fragment;
 		}
 
 		@Override
 		public int getCount() {
-			// Show 3 total pages.
-			return 3;
+			return cities.size();
 		}
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			switch (position) {
-			case 0:
-				return "MOSCOW";
-			case 1:
-				return "SAINT-PETERSBURG";
-			case 2:
-				return "LONDON";
+			if (cities.size() > position) {
+				return cities.get(position).cityName;
+			} else { 
+				return null;
 			}
-			return null;
 		}
 	}
 
