@@ -26,6 +26,7 @@ public class MainActivity extends FragmentActivity {
 	 */
 	static final String PREF_NAME = "WeatherPrefs";
 	static final String PREF_CUR_POS = "CurrentPosition";
+	static String PREF_UPDATE_PERIOD = "UpdatePeriod";
 	SectionsPagerAdapter mSectionsPagerAdapter;
 
 	/**
@@ -57,6 +58,9 @@ public class MainActivity extends FragmentActivity {
 		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
 		int position = settings.getInt(PREF_CUR_POS, 0);
 		mViewPager.setCurrentItem(position);
+		if (WeatherService.running) {
+			stopService(new Intent(MainActivity.this, WeatherService.class));
+		}
 	}
 	
 	@Override
@@ -67,15 +71,26 @@ public class MainActivity extends FragmentActivity {
 		SharedPreferences.Editor settingsEditor = settings.edit();
 		settingsEditor.putInt(PREF_CUR_POS, mViewPager.getCurrentItem());
 		settingsEditor.commit();
+		int updatePeriod = settings.getInt(PREF_UPDATE_PERIOD, 10);
+		if (!WeatherService.running) {
+			startService(new Intent(MainActivity.this, WeatherService.class));
+		} else if (WeatherService.running && updatePeriod != WeatherService.period) {
+			stopService(new Intent(MainActivity.this, WeatherService.class));
+			startService(new Intent(MainActivity.this, WeatherService.class));
+		}
 	}
 	
 	public void goToCityChoose(View view) {
-		Intent intent = new Intent(MainActivity.this, CityListActivity.class);
+		Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
 		startActivity(intent);
 	}
 	
 	public void update(View view) {
-		((WeatherFragment) mViewPager.getAdapter().instantiateItem(mViewPager, mViewPager.getCurrentItem())).update(); 
+		try {
+			((WeatherFragment) mViewPager.getAdapter().instantiateItem(mViewPager, mViewPager.getCurrentItem())).update();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

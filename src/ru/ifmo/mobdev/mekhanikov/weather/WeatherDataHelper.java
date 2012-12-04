@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteStatement;
 
 public class WeatherDataHelper {
 	private static String DATABASE_NAME;
-	private static final int DATABASE_VERSION = 3;
+	private static final int DATABASE_VERSION = 4;
 	private static final String TABLE_NAME = "cities";
 	private Context context;
 	private SQLiteDatabase db;
@@ -112,11 +112,21 @@ public class WeatherDataHelper {
 	}
 	
 	public void updateForecast(String cityId, Forecast forecast) {
-		updateStmt.bindString(1, forecast.curTemp);
-		updateStmt.bindString(2, forecast.curPicName);
-		updateStmt.bindString(3, forecast.curPres);
-		updateStmt.bindString(4, forecast.curWind);
-		updateStmt.bindString(5, forecast.curHum);
+		if (forecast.curTemp != null) {
+			updateStmt.bindString(1, forecast.curTemp);
+		}
+		if (forecast.curPicName != null) {
+			updateStmt.bindString(2, forecast.curPicName);
+		}
+		if (forecast.curPres != null) {
+			updateStmt.bindString(3, forecast.curPres);
+		}
+		if (forecast.curWind != null) {
+			updateStmt.bindString(4, forecast.curWind);
+		}
+		if (forecast.curHum != null) {
+			updateStmt.bindString(5, forecast.curHum);
+		}
 		for (int i = 0; i != 4; ++i) {
 			for (int j = 0; j != 4; ++j) {
 				if (forecast.forecast[i][j].temperature != null) {

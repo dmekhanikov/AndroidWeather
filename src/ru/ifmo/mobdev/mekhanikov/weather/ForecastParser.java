@@ -11,6 +11,9 @@ public class ForecastParser {
 	private Forecast result = new Forecast();
 	
 	public Forecast parse(String src) {
+		if (src == null) {
+			return null;
+		}
 		try {
 			System.setProperty("org.xml.sax.driver", "org.xmlpull.v1.sax2.Driver");
 			XMLReader xr = XMLReaderFactory.createXMLReader();

@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,14 +12,17 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class CityListActivity extends Activity {
+public class SettingsActivity extends Activity {
 	CitiesListAdapter listAdapter = null;
 	List<City> cities = null;
 	WeatherDataHelper dataHelper = null;
+	private static String PREF_NAME = "WeatherPrefs";
+	private static String PREF_UPDATE_PERIOD = "UpdatePeriod";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +30,7 @@ public class CityListActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		setContentView(R.layout.activity_city_list);
+		setContentView(R.layout.activity_settings);
 
 		dataHelper = new WeatherDataHelper(this, this.getClass().getPackage()
 				.getName());
@@ -35,25 +39,29 @@ public class CityListActivity extends Activity {
 		listAdapter = new CitiesListAdapter();
 		ListView listView = (ListView) findViewById(R.id.citiesList);
 		listView.setAdapter(listAdapter);
+
+		EditText editPeriod = (EditText) findViewById(R.id.editPeriod);
+		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
+		int period = settings.getInt(PREF_UPDATE_PERIOD, 10);
+		editPeriod.setText(String.valueOf(period));
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		Intent intent = new Intent(CityListActivity.this,
-				MainActivity.class);
+		Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);
 	}
 
 	public void addButtonClicked(View view) {
-		Intent intent = new Intent(CityListActivity.this, CityAddActivity.class);
+		Intent intent = new Intent(SettingsActivity.this, CityAddActivity.class);
 		startActivity(intent);
 	}
 
 	private class CitiesListAdapter extends ArrayAdapter<City> {
 
 		CitiesListAdapter() {
-			super(CityListActivity.this, R.layout.city_list_element);
+			super(SettingsActivity.this, R.layout.city_list_element);
 		}
 
 		@Override
@@ -93,6 +101,15 @@ public class CityListActivity extends Activity {
 			});
 			return row;
 		}
+	}
+
+	public void saveUpdatePeriod(View view) {
+		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
+		SharedPreferences.Editor settingsEditor = settings.edit();
+		EditText editPeriod = (EditText) findViewById(R.id.editPeriod);
+		settingsEditor.putInt(PREF_UPDATE_PERIOD,
+				Integer.parseInt(editPeriod.getText().toString()));
+		settingsEditor.commit();
 	}
 
 }

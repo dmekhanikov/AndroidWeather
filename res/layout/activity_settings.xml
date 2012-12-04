@@ -1,0 +1,64 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:screenOrientation="portrait"
+    tools:context=".CityChoose" >
+
+    <ListView
+        android:id="@+id/citiesList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/editPeriod"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/addCityButton"
+        android:clickable="false"
+        android:drawSelectorOnTop="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:longClickable="false" >
+
+    </ListView>
+
+    <Button
+        android:id="@+id/addCityButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="addButtonClicked"
+        android:text="Add New City" />
+
+    <Button
+        android:id="@+id/savePeriodButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/editPeriod"
+        android:layout_margin="2dp"
+        android:onClick="saveUpdatePeriod"
+        android:padding="1dp"
+        android:text="Save" />
+
+    <EditText
+        android:id="@+id/editPeriod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/savePeriodButton"
+        android:layout_toRightOf="@+id/textPeriod"
+        android:ems="10"
+        android:inputType="number"
+        android:maxLength="10" />
+
+    <TextView
+        android:id="@+id/textPeriod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/editPeriod"
+        android:layout_alignBottom="@+id/editPeriod"
+        android:layout_alignParentLeft="true"
+        android:text="Update Period, minutes" />
+
+</RelativeLayout>

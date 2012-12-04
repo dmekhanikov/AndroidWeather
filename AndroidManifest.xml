@@ -25,13 +25,18 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ru.ifmo.mobdev.mekhanikov.weather.CityListActivity"
+            android:name="ru.ifmo.mobdev.mekhanikov.weather.SettingsActivity"
             android:label="@string/title_activity_city_choose" >
         </activity>
         <activity
             android:name="ru.ifmo.mobdev.mekhanikov.weather.CityAddActivity"
             android:label="@string/title_activity_city_add" >
         </activity>
+
+        <service
+            android:name=".WeatherService"
+            android:enabled="true" >
+        </service>
     </application>
 
 </manifest>
