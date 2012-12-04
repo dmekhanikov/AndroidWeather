@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.List;
 
@@ -57,11 +58,11 @@ public class CityAddActivity extends Activity {
 						if (cities.get(position).cityId != null
 								&& dataHelper.selectCityById(cities
 										.get(position).cityId) == null) {
-							dataHelper.insert(cities.get(position));
+							dataHelper.insertCity(cities.get(position));
 							
 							SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
 							SharedPreferences.Editor settingsEditor = settings.edit();
-							settingsEditor.putInt(PREF_CUR_POS, cities.size() - 1);
+							settingsEditor.putInt(PREF_CUR_POS, Integer.MAX_VALUE);
 							settingsEditor.commit();
 							
 							Intent intent = new Intent(CityAddActivity.this,
@@ -147,6 +148,7 @@ public class CityAddActivity extends Activity {
 		@Override
 		protected List<City> doInBackground(String... cityNames) {
 			URL url;
+			URLConnection urlCon;
 			String query = null;
 			try {
 				query = "http://xml.weather.co.ua/1.2/city/?search="
@@ -156,14 +158,20 @@ public class CityAddActivity extends Activity {
 			}
 			try {
 				url = new URL(query);
+				urlCon = url.openConnection();
+				urlCon.setConnectTimeout(5000);
+				urlCon.connect();
 			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
 			}
 			StringBuilder source = null;
 			try {
 				BufferedReader sourceReader = new BufferedReader(
-						new InputStreamReader(url.openStream()));
+						new InputStreamReader(urlCon.getInputStream()));
 				source = new StringBuilder();
 				String line = sourceReader.readLine();
 				while (line != null) {

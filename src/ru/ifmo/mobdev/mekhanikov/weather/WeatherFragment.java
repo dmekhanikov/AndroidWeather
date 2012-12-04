@@ -1,11 +1,5 @@
 package ru.ifmo.mobdev.mekhanikov.weather;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,6 +15,8 @@ public class WeatherFragment extends Fragment {
 	private static final String[] states = { "Clear", "Cloudy", "Cloudy",
 			"Clouds", "Short Rain", "Rain", "Thunderstorm", "Hail", "Sleet",
 			"Snow", "Heavy Snow" };
+	private ForecastUpdater forecastUpdater = null;
+	private WeatherDataHelper dataHelper = null;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -28,38 +24,50 @@ public class WeatherFragment extends Fragment {
 		view = inflater.inflate(R.layout.weather_fragment_layout, container,
 				false);
 		cityId = getArguments().getString("cityId");
-		ForecastUpdater updater = new ForecastUpdater();
-		updater.execute(cityId);
+		forecastUpdater = new ForecastUpdater(getActivity());
+		dataHelper = new WeatherDataHelper(getActivity(), this.getClass()
+				.getPackage().getName());
+		try {
+			updateView(dataHelper.selectForecastByCityId(cityId));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		FragmentUpdater fragmentUpdater = new FragmentUpdater();
+		fragmentUpdater.execute();
 		return view;
+	}
+	
+	public void update() {
+		FragmentUpdater fragmentUpdater = new FragmentUpdater();
+		fragmentUpdater.execute();
 	}
 
 	private void updateView(Forecast forecast) throws Exception {
 		String packageName = this.getClass().getPackage().getName();
-		if (forecast.current.temperature != null) {
-			WeatherState w = forecast.current;
+		if (!forecast.curTemp.equals("")) {
 			ImageView image = (ImageView) view.findViewById(R.id.imageWeather);
-			image.setImageResource(this.getResources().getIdentifier(w.picName,
+			image.setImageResource(this.getResources().getIdentifier(forecast.curPicName,
 					"drawable", packageName));
 			TextView textTemp = (TextView) view
 					.findViewById(R.id.textTemperature);
-			textTemp.setText(w.temperature + "°C");
+			textTemp.setText(forecast.curTemp + "°C");
 			TextView textWeather = (TextView) view
 					.findViewById(R.id.textWeather);
-			int state = w.picName.charAt(1) - 48;
+			int state = forecast.curPicName.charAt(1) - 48;
 			textWeather.setText(states[state]);
 			TextView textWind = (TextView) view.findViewById(R.id.textWind);
-			textWind.setText("Wind: " + w.wind + " m/s");
+			textWind.setText("Wind: " + forecast.curWind + " m/s");
 			TextView textHumidity = (TextView) view
 					.findViewById(R.id.textHumidity);
-			textHumidity.setText("Humidity: " + w.humidity + "%");
+			textHumidity.setText("Humidity: " + forecast.curHum + "%");
 			TextView textPressure = (TextView) view
 					.findViewById(R.id.textPressure);
-			textPressure.setText("Pressure: " + w.pressure + " mmHg");
+			textPressure.setText("Pressure: " + forecast.curPres + " mmHg");
 		}
 		for (int day = 0; day != 4; ++day) {
 			for (int daypart = 0; daypart != 4; ++daypart) {
 				WeatherState w = forecast.forecast[day][daypart];
-				if (w.temperature != null) {
+				if (!w.temperature.equals("")) {
 					int imageId = this.getResources().getIdentifier(
 							"imageWeather" + day + "_" + daypart, "id",
 							packageName);
@@ -77,38 +85,19 @@ public class WeatherFragment extends Fragment {
 		}
 	}
 
-	public class ForecastUpdater extends AsyncTask<String, Void, Forecast> {
+	private class FragmentUpdater extends AsyncTask<Void, Void, Forecast> {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 		}
 
 		@Override
-		protected Forecast doInBackground(String... cityIds) {
-			URL url;
-			String query = "http://xml.weather.co.ua/1.2/forecast/"
-					+ cityIds[0] + "?dayf=4";
-			try {
-				url = new URL(query);
-			} catch (MalformedURLException e) {
+		protected Forecast doInBackground(Void... data) {
+			if (forecastUpdater.update()) {
+				return dataHelper.selectForecastByCityId(cityId);
+			} else {
 				return null;
 			}
-			StringBuilder source = null;
-			try {
-				BufferedReader sourceReader = new BufferedReader(
-						new InputStreamReader(url.openStream()));
-				source = new StringBuilder();
-				String line = sourceReader.readLine();
-				while (line != null) {
-					source.append(line);
-					line = sourceReader.readLine();
-				}
-			} catch (IOException e) {
-				return null;
-			}
-			Forecast result = new ForecastParser().parse(source.toString());
-			result.updateTime = System.currentTimeMillis();
-			return result;
 		}
 
 		@Override

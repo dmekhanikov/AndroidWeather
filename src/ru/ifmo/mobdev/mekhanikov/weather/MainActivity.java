@@ -73,6 +73,10 @@ public class MainActivity extends FragmentActivity {
 		Intent intent = new Intent(MainActivity.this, CityListActivity.class);
 		startActivity(intent);
 	}
+	
+	public void update(View view) {
+		((WeatherFragment) mViewPager.getAdapter().instantiateItem(mViewPager, mViewPager.getCurrentItem())).update(); 
+	}
 
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

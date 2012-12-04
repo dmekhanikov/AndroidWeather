@@ -29,9 +29,7 @@ public class ForecastParser {
 	private class XMLParser extends DefaultHandler {
 		boolean inCurrentSec = false;
 		boolean inTempSec = false;
-		boolean inWindSec = false;
-		boolean inPressSec = false;
-		boolean inHumiditySec = false;
+
 		int day = -1;
 		int hour = 30;
 		int daypart = -1;
@@ -47,12 +45,6 @@ public class ForecastParser {
 				inCurrentSec = true;
 			} else if (qName.equals("t")) {
 				inTempSec = true;
-			} else if (qName.equals("wind")) {
-				inWindSec = true;
-			} else if (qName.equals("p")) {
-				inPressSec = true;
-			} else if (qName.equals("hmid")) {
-				inHumiditySec = true;
 			} else if (qName.equals("day")) {
 				int newHour = Integer.parseInt(atts.getValue(1));
 				if (newHour == 3) {
@@ -90,12 +82,6 @@ public class ForecastParser {
 				inCurrentSec = false;
 			} else if (localName.equals("t")) {
 				inTempSec = false;
-			} else if (localName.equals("wind")) {
-				inWindSec = false;
-			} else if (localName.equals("p")) {
-				inPressSec = false;
-			} else if (localName.equals("hmid")) {
-				inHumiditySec = false;
 			}
 			thisSec = "";
 		}
@@ -109,53 +95,35 @@ public class ForecastParser {
 			String line = new String(ch, start, length);
 			if (thisSec.equals("pict")) {
 				if (inCurrentSec) {
-					result.current.picName = line.substring(0, line.length() - 4);
+					result.curPicName = line.substring(0, line.length() - 4);
 				} else {
 					result.forecast[day][daypart].picName = line.substring(0, line.length() - 4);;
 				}
 			} else if (thisSec.equals("t")) {
 				if (inCurrentSec) {
-					result.current.temperature = line;
+					result.curTemp = line;
 				} else {
 					result.forecast[day][daypart].temperature = line;
 				}
 			} else if (thisSec.equals("p")) {
 				if (inCurrentSec) {
-					result.current.pressure = line;
-				} else {
-					result.forecast[day][daypart].pressure = line;
+					result.curPres = line;
 				}
 			} else if (thisSec.equals("w")) {
 				if (inCurrentSec) {
-					result.current.wind = line;
-				} else {
-					result.forecast[day][daypart].wind = line;
+					result.curWind = line;
 				}
 			} else if (thisSec.equals("h")) {
 				if (inCurrentSec) {
-					result.current.humidity = line;
-				} else {
-					result.forecast[day][daypart].humidity = line;
+					result.curHum = line;
 				}
 			} else if (thisSec.equals("min")) {
 				if (inTempSec) {
 					result.forecast[day][daypart].temperature = line;
-				} else if (inWindSec) {
-					result.forecast[day][daypart].wind = line;
-				} else if (inPressSec) {
-					result.forecast[day][daypart].pressure = line;
-				} else if (inHumiditySec) {
-					result.forecast[day][daypart].humidity = line;
 				}
 			} else if (thisSec.equals("max")) {
 				if (inTempSec) {
 					result.forecast[day][daypart].temperature += " to " + line;
-				} else if (inWindSec) {
-					result.forecast[day][daypart].wind += " to " + line;
-				} else if (inPressSec) {
-					result.forecast[day][daypart].pressure += " to " + line;
-				} else if (inHumiditySec) {
-					result.forecast[day][daypart].humidity += " to " + line;
 				}
 			}
 		}
