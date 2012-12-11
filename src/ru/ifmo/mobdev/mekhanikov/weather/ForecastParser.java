@@ -126,7 +126,7 @@ public class ForecastParser {
 				}
 			} else if (thisSec.equals("max")) {
 				if (inTempSec) {
-					result.forecast[day][daypart].temperature += " to " + line;
+					result.forecast[day][daypart].temperature += ".." + line;
 				}
 			}
 		}

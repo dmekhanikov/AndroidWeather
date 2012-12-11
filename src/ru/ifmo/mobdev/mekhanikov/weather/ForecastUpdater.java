@@ -15,8 +15,7 @@ public class ForecastUpdater {
 	private WeatherDataHelper dataHelper = null;
 
 	public ForecastUpdater(Context context) {
-		dataHelper = new WeatherDataHelper(context, this.getClass()
-				.getPackage().getName());
+		dataHelper = new WeatherDataHelper(context);
 	}
 
 	public boolean update() {

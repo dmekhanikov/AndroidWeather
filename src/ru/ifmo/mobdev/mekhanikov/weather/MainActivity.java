@@ -52,7 +52,7 @@ public class MainActivity extends FragmentActivity {
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-		dataHelper = new WeatherDataHelper(this, this.getClass().getPackage().getName());
+		dataHelper = new WeatherDataHelper(this);
 		cities = dataHelper.selectAllCities();
 		
 		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
@@ -60,6 +60,13 @@ public class MainActivity extends FragmentActivity {
 		mViewPager.setCurrentItem(position);
 		if (WeatherService.running) {
 			stopService(new Intent(MainActivity.this, WeatherService.class));
+		}
+		int updatePeriod = settings.getInt(PREF_UPDATE_PERIOD, 10);
+		if (!WeatherService.running) {
+			startService(new Intent(MainActivity.this, WeatherService.class));
+		} else if (WeatherService.running && updatePeriod != WeatherService.period) {
+			stopService(new Intent(MainActivity.this, WeatherService.class));
+			startService(new Intent(MainActivity.this, WeatherService.class));
 		}
 	}
 	
@@ -71,13 +78,6 @@ public class MainActivity extends FragmentActivity {
 		SharedPreferences.Editor settingsEditor = settings.edit();
 		settingsEditor.putInt(PREF_CUR_POS, mViewPager.getCurrentItem());
 		settingsEditor.commit();
-		int updatePeriod = settings.getInt(PREF_UPDATE_PERIOD, 10);
-		if (!WeatherService.running) {
-			startService(new Intent(MainActivity.this, WeatherService.class));
-		} else if (WeatherService.running && updatePeriod != WeatherService.period) {
-			stopService(new Intent(MainActivity.this, WeatherService.class));
-			startService(new Intent(MainActivity.this, WeatherService.class));
-		}
 	}
 	
 	public void goToCityChoose(View view) {

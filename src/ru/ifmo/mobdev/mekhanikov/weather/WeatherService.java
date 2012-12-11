@@ -4,9 +4,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.util.Log;
 
 public class WeatherService extends Service {
 	private static String PREF_NAME = "WeatherPrefs";
@@ -38,6 +41,7 @@ public class WeatherService extends Service {
 		tTask = new TimerTask() {
 			public void run() {
 				forecastUpdater.update();
+				Log.i("progress", "updated");
 			}
 		};
 		timer.schedule(tTask, period * 60 * 1000, period * 60 * 1000);
@@ -50,5 +54,13 @@ public class WeatherService extends Service {
 			tTask.cancel();
 		}
 		running = false;
+	}
+	
+	public static class Autostarter extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			context.startService(new Intent(context, WeatherService.class));
+		}
 	}
 }

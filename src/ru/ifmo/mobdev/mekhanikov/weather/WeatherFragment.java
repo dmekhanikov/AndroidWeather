@@ -25,8 +25,7 @@ public class WeatherFragment extends Fragment {
 				false);
 		cityId = getArguments().getString("cityId");
 		forecastUpdater = new ForecastUpdater(getActivity());
-		dataHelper = new WeatherDataHelper(getActivity(), this.getClass()
-				.getPackage().getName());
+		dataHelper = new WeatherDataHelper(getActivity());
 		try {
 			updateView(dataHelper.selectForecastByCityId(cityId));
 		} catch (Exception e) {

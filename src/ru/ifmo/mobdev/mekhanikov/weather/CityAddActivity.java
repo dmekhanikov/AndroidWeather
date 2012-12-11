@@ -45,8 +45,7 @@ public class CityAddActivity extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_city_add);
 
-		dataHelper = new WeatherDataHelper(this, this.getClass().getPackage()
-				.getName());
+		dataHelper = new WeatherDataHelper(this);
 
 		listAdapter = new CitySearchListAdapter();
 		ListView citiesListView = (ListView) findViewById(R.id.citiesListView);
@@ -62,7 +61,7 @@ public class CityAddActivity extends Activity {
 							
 							SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
 							SharedPreferences.Editor settingsEditor = settings.edit();
-							settingsEditor.putInt(PREF_CUR_POS, Integer.MAX_VALUE);
+							settingsEditor.putInt(PREF_CUR_POS, 0);
 							settingsEditor.commit();
 							
 							Intent intent = new Intent(CityAddActivity.this,

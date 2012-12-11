@@ -32,8 +32,7 @@ public class SettingsActivity extends Activity {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_settings);
 
-		dataHelper = new WeatherDataHelper(this, this.getClass().getPackage()
-				.getName());
+		dataHelper = new WeatherDataHelper(this);
 		cities = dataHelper.selectAllCities();
 
 		listAdapter = new CitiesListAdapter();
