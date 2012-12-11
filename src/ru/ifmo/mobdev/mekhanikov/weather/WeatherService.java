@@ -1,24 +1,29 @@
 package ru.ifmo.mobdev.mekhanikov.weather;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
-import android.app.Service;
+import android.app.AlarmManager;
+import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
 
-public class WeatherService extends Service {
-	private static String PREF_NAME = "WeatherPrefs";
-	private static String PREF_UPDATE_PERIOD = "UpdatePeriod";
+public class WeatherService extends IntentService {
+	
+	private static final String PREF_NAME = "WeatherPrefs";
+	private static final String PREF_UPDATE_PERIOD = "UpdatePeriod";
+	private static final String SERVICE_NAME = "WeatherService";
 	public static long period = 0;
 	public static boolean running = false;
-	Timer timer = null;
-	TimerTask tTask = null;
 	ForecastUpdater forecastUpdater = null;
+	
+	public WeatherService() {
+		super(SERVICE_NAME);
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -27,33 +32,37 @@ public class WeatherService extends Service {
 
 	@Override
 	public void onCreate() {
-		timer = new Timer();
+		super.onCreate();
 		forecastUpdater = new ForecastUpdater(this);
 	}
-
+	
 	@Override
-	public void onStart(Intent intent, int startid) {
-		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
-		period = settings.getInt(PREF_UPDATE_PERIOD, 10);
-		if (tTask != null) {
-			tTask.cancel();
-		}
-		tTask = new TimerTask() {
-			public void run() {
-				forecastUpdater.update();
-				Log.i("progress", "updated");
-			}
-		};
-		timer.schedule(tTask, period * 60 * 1000, period * 60 * 1000);
-		running = true;
+	public void onDestroy() {
+		super.onDestroy();
 	}
 
 	@Override
-	public void onDestroy() {
-		if (tTask != null) {
-			tTask.cancel();
-		}
-		running = false;
+	protected void onHandleIntent(Intent intent) {
+		forecastUpdater.update();
+		Log.i("progress", "updated");
+		scheduleNextUpdate();
+	}
+	
+	private void scheduleNextUpdate() {
+		SharedPreferences settings = getSharedPreferences(PREF_NAME, 0);
+		period = settings.getInt(PREF_UPDATE_PERIOD, 10);
+		
+		Intent intent = new Intent(this, this.getClass());
+	    PendingIntent pendingIntent =
+	        PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+	    long currentTimeMillis = System.currentTimeMillis();
+	    long nextUpdateTimeMillis = currentTimeMillis + period * DateUtils.MINUTE_IN_MILLIS;
+	    Time nextUpdateTime = new Time();
+	    nextUpdateTime.set(nextUpdateTimeMillis);
+
+	    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+	    alarmManager.set(AlarmManager.RTC, nextUpdateTimeMillis, pendingIntent);
 	}
 	
 	public static class Autostarter extends BroadcastReceiver {
